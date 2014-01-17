@@ -1,0 +1,7 @@
+name: VendEx
+version: 0.1
+description: Player vending plugin for Shadowraze Network
+author: SirReason
+
+main: net.shadowraze.vendex.VendEx
+depends: [Vault]
