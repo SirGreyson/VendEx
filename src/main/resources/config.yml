@@ -1,2 +1,230 @@
+#Plugin messaging configuration
+pluginPrefix: '&5[VendEx]'
+adminPermission: vendex.admin
+
+#Plugin messages
 messages:
-  pluginPrefix: '[&5VendEx&f]'
+  shopCreated: 'You have succesfully created a shop!'
+  shopDeleted: 'You have succesfully deleted your shop!'
+  askOfferPrice: 'How much do you want for 1 of this item? No decimals!'
+  askOfferCmd: 'If you would like to bind a command to this item, type the command now. Use %p to replace playerName, and exclude the forward slash. If you don''t want to add a command to this item, just type &bnoCmd'
+  offerAdded: 'You have added an offer to your shop! Click the item in your shop to add/remove inventory.'
+  offerRemoved: 'You have successfully removed this offer from your shop!'
+  wgRegionSet: 'You have successfully set the world guard region! Please reload!'
+
+#Plugin Error messages
+errMessages:
+  noShopFound: 'Error! You do not currently have a shop!'
+  shopAlreadyExists: 'Error! You already have a shop!'
+  shopCantDelete: 'You cannot delete this shop without removing all inventory!'
+  offerCantDelete: 'Please remove all offer inventory before you can remove the offer.'
+  noMenuPermission: 'Error! You do not have permission to view this menu!'
+  cannotHoldPurchase: 'Error! You do not have enough free inventory space!'
+  itemOutOfStock: 'Error! There is not enough of this item in stock!'
+  notEnoughMoney: 'Error! You do not have enough money!'
+  offerAlreadyExists: 'You are already selling this item!'
+  entryNotNumber: 'Error! Your entry is invalid! Please be sure that your entry is a number without decimal places. (IE. 1 , 10, 100, etc.)'
+  editOffersNoPerms: 'Error! You do not have permission to edit offers in this shop!'
+  blackListItem: 'Error! This item is not allowed to be sold!'
+  cantDeleteServerShop: 'Error! You cannot delete the server shop!'
+
+#Plugin WorldGuard configuration
+worldGuard:
+  enabled: true
+  world: world
+  regionName: market
+  errorMsg: '&cError! You must be in the market to do this!'
+  
+shopConfig:
+  #List of disallowed materials
+  blackList:
+    - WOOD
+    - BEACON
+    - OBSIDIAN
+  vendorName: '&cShadowRaze Vendor'
+  vendorLocations: 
+    - 0,0,0,world
+  #Server Shop title and size  
+  serverShop:
+    title: '&6Server Shop'
+    size: 54  
+  #Player Shop prefix (prefix + playerName's shop)  
+  playerShop:
+    prefix: '&e'
+  #Shop saving interval (20 ticks = 1 sec)
+  saveInterval:
+    enabled: true
+    ticks: 12000
+  #Market menu reload interval (20 ticks = 1 sec)
+  marketMenuReloadInterval:
+    enabled: true
+    ticks: 12000
+
+#Plugin trading configuration    
+tradeConfig:
+  #List of disallowed materials
+  blackList: 
+    - WOOD
+    - BEACON
+    - OBSIDIAN
+  #Time between trade invites in seconds
+  antiSpamInterval: 5
+  #Time before trade invites expire in seconds
+  tradeInviteExpireInterval: 60
+  tradeMenu:
+    title: '&6VendEx Trading System'
+    size: 54
+    moneyItem: PAPER
+
+#Plugin menu configuration
+menuConfig:
+  #Main VendEx navigation menu
+  vendExMenu:
+    title: '&4VendEx Menu'
+    size: 9
+    menuItems:
+      '2':
+        title: '&cServer Shop'
+        lore:
+          - Click to browse the server shop
+        material: ENDER_CHEST
+        cmd: menu servershop
+      '4':
+        title: '&5Player Market'
+        lore:
+          - Click to browse the player market
+        material: CHEST
+        cmd: menu market
+      '6':
+         title: '&eManage Personal Shop'
+         lore:
+           - Click to manage your personal shop
+         material: ANVIL
+         cmd: shop manage
+       
+  #Main VendEx admin navigation menu       
+  adminMenu:
+    title: '&4VendEx Admin Menu'
+    size: 9
+    menuItems:
+      '6':
+         title: '&eManage Server Shop'
+         lore:
+           - Click to manage the server shop
+         material: ANVIL
+         cmd: shop manage servershop
+      '8':
+        title: '&6Toggle View'
+        lore:
+          - Toggle between Admin and Normal view
+        material: ENDER_CHEST
+        cmd: menu admin toggle
+       
+  #Menu to create new player shop       
+  createShopMenu:
+    title: '&fShop Creator'
+    size: 9
+    menuItems:
+      '4':
+        title: '&6Create Shop'
+        lore:
+          - Click to create a new shop!
+        material: WORKBENCH
+        cmd: shop create
+      '8':
+        title: '&5Go back'
+        lore:
+          - Click to return to the main menu
+        material: MAP
+        cmd: menu vendex
+        
+  #Menu to manage player shop offers and status
+  manageShopMenu:
+    title: '&fShop Manager'
+    size: 9
+    menuItems:
+      '0':
+        title: '&6View Shop'
+        lore:
+          - Click to view your shop and add/remove inventory
+        material: TRAPPED_CHEST
+        cmd: shop open
+      '3':
+        title: '&bAdd Offer'
+        lore:
+          - Click to add a new offer to your shop
+        material: WATER_BUCKET
+        cmd: shop addoffer
+      '4':
+        title: '&cRemove Offer'
+        lore:
+          - Click to remove an existing offer from your shop
+        material: LAVA_BUCKET
+        cmd: shop removeoffer
+      '5':
+        title: '&4Close Shop'
+        lore:
+          - Click to close your shop
+        material: BUCKET
+        cmd: shop delete
+      '8':
+        title: '&5Go back'
+        lore:
+          - Click to return to the main menu
+        material: MAP
+        cmd: menu main
+        
+  #Menu to manage server shop offers and status      
+  manageServerShopMenu:
+    title: '&6Server Shop Manager'
+    size: 9
+    menuItems:
+      '0':
+        title: '&6View Shop'
+        lore:
+          - Click to view the server shop
+        material: TRAPPED_CHEST
+        cmd: menu servershop
+      '3':
+        title: '&bAdd Offer'
+        lore:
+          - Click to add a new offer to the server shop
+        material: WATER_BUCKET
+        cmd: shop addoffer servershop
+      '4':
+        title: '&cRemove Offer'
+        lore:
+          - Click to remove an existing offer from the server shop
+        material: LAVA_BUCKET
+        cmd: shop removeoffer servershop
+      '5':
+        title: '&4Close Shop'
+        lore:
+          - Click to close the server shop
+        material: BUCKET
+        cmd: shop delete servershop
+      '8':
+        title: '&5Go back'
+        lore:
+          - Click to return to the main menu
+        material: MAP
+        cmd: menu main
+        
+  #Menu to view all player shops > Size is per-page
+  playerMarketMenu:
+    title: '&6Player Market'
+    size: 54      
+  
+  #Menu to manage shop offer inventories
+  offerInventoryMenu:
+    title: '&eOffer Inventory'
+    size: 9
+    
+  #Menu to add shop offers  
+  addOfferMenu:
+    title: '&eSelect item to add:'
+    size: 9
+    
+  #Menu to remove shop offers  
+  removeOfferMenu:
+    title: '&cSelect offer to remove:'

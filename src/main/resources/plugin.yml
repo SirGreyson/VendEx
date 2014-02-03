@@ -4,4 +4,18 @@ description: Player vending plugin for Shadowraze Network
 author: SirReason
 
 main: net.shadowraze.vendex.VendEx
-depends: [Vault]
+depends: [Vault, WorldGuard]
+
+commands:
+  menu:
+    description: Main menu management command
+    usage: Syntax error! Type /menu help for assistance
+  shop:
+    description: Main shop management command
+    usage: Syntax error! Type /shop help for assistance
+  market:
+    description: Main market management command
+    usage: Syntax error! Type /market help for assistance
+  trade:
+    description: Main trade management command
+    usage: Syntax error! Type /trade help for assistance

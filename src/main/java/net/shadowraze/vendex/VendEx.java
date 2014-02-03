@@ -1,69 +1,69 @@
 package net.shadowraze.vendex;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
-import net.shadowraze.vendex.market.MarketUtil;
-import net.shadowraze.vendex.market.OfferType;
-import net.shadowraze.vendex.market.Shop;
-import net.shadowraze.vendex.market.ShopItem;
-import net.shadowraze.vendex.util.Util;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import net.shadowraze.vendex.cmd.CommandHandler;
+import net.shadowraze.vendex.cmd.cmds.MarketCmd;
+import net.shadowraze.vendex.cmd.cmds.MenuCmd;
+import net.shadowraze.vendex.cmd.cmds.ShopCmd;
+import net.shadowraze.vendex.cmd.cmds.TradeCmd;
+import net.shadowraze.vendex.market.MarketManager;
+import net.shadowraze.vendex.menu.MenuHandler;
+import net.shadowraze.vendex.trade.oldTrade.TradeHandler;
+import net.shadowraze.vendex.util.Variables;
+import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-public class VendEx extends JavaPlugin {
+public class VendEx extends JavaPlugin implements Listener {
 
     public static Economy economy;
     public static Permission permission;
-    public static List<Shop> playerShops = new ArrayList<Shop>();
 
     public void onEnable() {
         if(!canEnable()) getServer().getPluginManager().disablePlugin(this);
-        loadPlayerShops();
+        new Variables(this).loadVariables();
+        MarketManager.instance.loadShops(this);
+        MenuHandler.getInstance().loadMenus(this);
+        MarketManager.getVendors();
+        getServer().getPluginManager().registerEvents(MenuHandler.getInstance(), this);
+        getServer().getPluginManager().registerEvents(TradeHandler.getInstance(), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+        CommandHandler.getInstance().registerCommand("menu", new MenuCmd());
+        CommandHandler.getInstance().registerCommand("shop", new ShopCmd());
+        CommandHandler.getInstance().registerCommand("market", new MarketCmd());
+        CommandHandler.getInstance().registerCommand("trade", new TradeCmd());
         getLogger().info("has been enabled");
     }
 
     public void onDisable() {
-        savePlayerShops();
+        MarketManager.instance.saveShops(this);
+        MarketManager.removeVendors();
         getLogger().info("has been disabled");
     }
 
-    public boolean canEnable() {
-        if(!getServer().getPluginManager().isPluginEnabled("Vault")) return false;
-        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
-        if(economyProvider == null) return false;
-        economy = economyProvider.getProvider();
+    private boolean canEnable() {
+        if(getWorldGuard() == null) return false;
+        else if(!getServer().getPluginManager().isPluginEnabled("Vault")) return false;
         RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
-        permission = permissionProvider.getProvider();
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
+        if(permissionProvider != null && economyProvider != null) {
+            permission = getServer().getServicesManager().getRegistration(Permission.class).getProvider();
+            economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
+        }
         return economy != null && permission != null;
     }
 
-    public void loadPlayerShops() {
-        File shopFolder = new File(getDataFolder() + File.pathSeparator + "shops");
-        Util.validateFile(shopFolder);
-        for (File shopFile : shopFolder.listFiles()) {
-            if (shopFile.getName().contains(".yml")) {
-                FileConfiguration shopConfig = YamlConfiguration.loadConfiguration(shopFile);
-                String shopOwner = shopFile.getName().split(".yml")[0];
-                int shopSize = MarketUtil.getShopSize(shopOwner);
-                Shop playerShop = new Shop(shopOwner, shopSize);
-                if (shopConfig.getConfigurationSection("shopItems") != null)
-                    for (int i = 0; i < shopSize; i++)
-                        if (shopConfig.getConfigurationSection("shopItems." + i) != null)
-                            new ShopItem(playerShop, shopConfig.getItemStack("shopItems." + i + ".itemStack"),
-                                    OfferType.valueOf(shopConfig.getString("shopItems." + i + ".offerType")),
-                                    shopConfig.getInt("shopItems." + i + ".price"), shopConfig.getInt("shopItems." + i + ".amount"));
-            }
-        }
+    private WorldGuardPlugin getWorldGuard() {
+        Plugin worldGuard = getServer().getPluginManager().getPlugin("WorldGuard");
+        if(worldGuard == null | !(worldGuard instanceof WorldGuardPlugin)) return null;
+        return (WorldGuardPlugin) worldGuard;
     }
 
-    public void savePlayerShops() {
-        for(Shop playerShop : playerShops)
-            playerShop.saveToFile(this);
+    public static VendEx getPlugin() {
+        return (VendEx) Bukkit.getServer().getPluginManager().getPlugin("VendEx");
     }
 }
