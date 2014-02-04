@@ -2,7 +2,6 @@ package net.shadowraze.vendex.cmd.cmds;
 
 import net.shadowraze.vendex.cmd.RootCommand;
 import net.shadowraze.vendex.cmd.SubCommand;
-import net.shadowraze.vendex.trade.oldTrade.TradeHandler;
 import net.shadowraze.vendex.util.Messaging;
 import org.bukkit.entity.Player;
 
@@ -30,7 +29,7 @@ public class TradeCmd extends RootCommand {
 
         @Override
         public boolean onCommand(Player player, String[] args) {
-            TradeHandler.getInstance().toggleTrade(player);
+            //TradeHandler.getInstance().toggleTrade(player);
             return true;
         }
 
@@ -44,7 +43,7 @@ public class TradeCmd extends RootCommand {
 
         @Override
         public boolean onCommand(Player player, String[] args) {
-            TradeHandler.getInstance().tryAcceptTrade(player);
+            //TradeHandler.getInstance().tryAcceptTrade(player);
             return true;
         }
 

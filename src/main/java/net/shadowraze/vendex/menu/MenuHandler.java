@@ -2,6 +2,7 @@ package net.shadowraze.vendex.menu;
 
 import net.shadowraze.vendex.VendEx;
 import net.shadowraze.vendex.market.MarketManager;
+import net.shadowraze.vendex.market.menus.*;
 import net.shadowraze.vendex.menu.menus.*;
 import net.shadowraze.vendex.util.Util;
 import org.bukkit.ChatColor;

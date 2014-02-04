@@ -10,8 +10,10 @@ import net.shadowraze.vendex.cmd.cmds.ShopCmd;
 import net.shadowraze.vendex.cmd.cmds.TradeCmd;
 import net.shadowraze.vendex.market.MarketManager;
 import net.shadowraze.vendex.menu.MenuHandler;
-import net.shadowraze.vendex.trade.oldTrade.TradeHandler;
+import net.shadowraze.vendex.trade.TradeHandler;
 import net.shadowraze.vendex.util.Variables;
+import org.amhokies.votingRewards.VotingRewards;
+import org.amhokies.votingRewards.player.PlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -63,7 +65,12 @@ public class VendEx extends JavaPlugin implements Listener {
         return (WorldGuardPlugin) worldGuard;
     }
 
+    public static PlayerManager getVotingRewards() {
+        if(Bukkit.getPluginManager().getPlugin("VotingRewards") == null) return null;
+        return VotingRewards.getPlayerManager();
+    }
+
     public static VendEx getPlugin() {
-        return (VendEx) Bukkit.getServer().getPluginManager().getPlugin("VendEx");
+        return (VendEx) Bukkit.getPluginManager().getPlugin("VendEx");
     }
 }

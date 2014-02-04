@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -38,6 +39,15 @@ public class Util {
         tempMeta.setLore(parsedLore);
         tempStack.setItemMeta(tempMeta);
         return tempStack;
+    }
+
+
+    public static boolean canAddItem(Inventory inventory, ItemStack addItem) {
+        int leftToAdd = addItem.getAmount();
+        for(ItemStack itemStack : inventory.getContents())
+            if(itemStack == null) leftToAdd -= addItem.getMaxStackSize();
+            else if(itemStack.isSimilar(itemStack)) leftToAdd -= addItem.getMaxStackSize() - itemStack.getAmount();
+        return leftToAdd <= 0;
     }
 
     public static String parseColor(String coloredString) {

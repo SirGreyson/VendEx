@@ -71,10 +71,11 @@ tradeConfig:
   antiSpamInterval: 5
   #Time before trade invites expire in seconds
   tradeInviteExpireInterval: 60
+  moneyItem: PAPER
+  goldTokenItem: GOLD_INGOT
   tradeMenu:
     title: '&6VendEx Trading System'
     size: 54
-    moneyItem: PAPER
 
 #Plugin menu configuration
 menuConfig:
@@ -225,6 +226,6 @@ menuConfig:
     title: '&eSelect item to add:'
     size: 9
     
-  #Menu to remove shop offers  
+  #Menu to remove shop offers (size = player's shop size)  
   removeOfferMenu:
     title: '&cSelect offer to remove:'

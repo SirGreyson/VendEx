@@ -1,4 +1,4 @@
-package net.shadowraze.vendex.menu.menus;
+package net.shadowraze.vendex.market.menus;
 
 import net.shadowraze.vendex.menu.Menu;
 import net.shadowraze.vendex.menu.MenuHandler;
@@ -14,12 +14,12 @@ import org.bukkit.inventory.Inventory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServerShopManagementMenu extends Menu {
+public class ShopManagementMenu extends Menu {
 
     private Inventory menuInventory;
     private Map<Integer, String> menuCmds;
 
-    public ServerShopManagementMenu(String menuTitle, int menuSize) {
+    public ShopManagementMenu(String menuTitle, int menuSize) {
         super(menuTitle, menuSize);
     }
 
@@ -28,7 +28,7 @@ public class ServerShopManagementMenu extends Menu {
         menuInventory = Bukkit.createInventory(null, getSize(), getTitle());
         menuCmds = new HashMap<Integer, String>();
         for(int i = 0; i < getSize(); i++) {
-            ConfigurationSection iSec = MenuHandler.menuConfig.getConfigurationSection("manageServerShopMenu.menuItems." + i);
+            ConfigurationSection iSec = MenuHandler.menuConfig.getConfigurationSection("manageShopMenu.menuItems." + i);
             if(iSec != null) {
                 menuInventory.setItem(i, Util.metaStack(iSec.getString("title"), iSec.getStringList("lore"), Material.valueOf(iSec.getString("material"))));
                 menuCmds.put(i, iSec.getString("cmd"));
@@ -50,6 +50,5 @@ public class ServerShopManagementMenu extends Menu {
 
     @Override
     public void onMenuClose(InventoryCloseEvent e) {
-
     }
 }

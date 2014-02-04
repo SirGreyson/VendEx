@@ -1,4 +1,4 @@
-package net.shadowraze.vendex.menu.menus;
+package net.shadowraze.vendex.market.menus;
 
 import net.shadowraze.vendex.VendEx;
 import net.shadowraze.vendex.market.Shop;
@@ -6,6 +6,7 @@ import net.shadowraze.vendex.market.ShopOffer;
 import net.shadowraze.vendex.menu.Menu;
 import net.shadowraze.vendex.menu.MenuHandler;
 import net.shadowraze.vendex.util.Messaging;
+import net.shadowraze.vendex.util.Util;
 import net.shadowraze.vendex.util.Variables;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,7 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -50,17 +50,17 @@ public class ShopMenu extends Menu {
             if(VendEx.economy.getBalance(cPlayer.getName()) >= buyAmount * shopOffer.getShopPrice()) {
                 if(shopOffer.hasBoundCmd() && shopOffer.getShop().isServerShop()) {
                     VendEx.economy.withdrawPlayer(cPlayer.getName(), shopOffer.getShopPrice() * buyAmount);
-                    Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), shopOffer.getBoundCmd().replace("%p", cPlayer.getName()));
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), shopOffer.getBoundCmd().replace("%p", cPlayer.getName()));
                 } else {
                     if(shopOffer.getShopAmount() >= buyAmount) {
                         ItemStack buyStack = new ItemStack(shopOffer.getItemStack());
                         buyStack.setAmount(buyAmount);
-                        if(canAddItem(cPlayer.getInventory(), buyStack)) {
+                        if(Util.canAddItem(cPlayer.getInventory(), buyStack)) {
                             VendEx.economy.withdrawPlayer(cPlayer.getName(), shopOffer.getShopPrice() * buyAmount);
                             shopOffer.setShopAmount(shopOffer.getShopAmount() - buyAmount);
                             cPlayer.getInventory().addItem(buyStack);
-                            if(Bukkit.getServer().getPlayerExact(cShop.getShopOwner()) != null)
-                                Messaging.sendMessage(Bukkit.getServer().getPlayerExact(cShop.getShopOwner()), cPlayer.getName() + " has just spent " + shopOffer.getShopPrice() * buyAmount + " at your shop!");
+                            if(Bukkit.getPlayerExact(cShop.getShopOwner()) != null)
+                                Messaging.sendMessage(Bukkit.getPlayerExact(cShop.getShopOwner()), cPlayer.getName() + " has just spent " + shopOffer.getShopPrice() * buyAmount + " at your shop!");
                         } else Messaging.sendErrorMessage(cPlayer, Variables.ERRMESSAGES.get("cannotHoldPurchase"));
                     } else Messaging.sendErrorMessage(cPlayer, Variables.ERRMESSAGES.get("itemOutOfStock"));
                 }
@@ -72,13 +72,5 @@ public class ShopMenu extends Menu {
     public void onMenuClose(InventoryCloseEvent e) {
         shopMap.remove(e.getPlayer().getName());
         //TODO: Open player market
-    }
-
-    private boolean canAddItem(Inventory inventory, ItemStack addItem) {
-        int leftToAdd = addItem.getAmount();
-        for(ItemStack itemStack : inventory.getContents())
-            if(itemStack == null) leftToAdd -= addItem.getMaxStackSize();
-            else if(itemStack.isSimilar(itemStack)) leftToAdd -= addItem.getMaxStackSize() - itemStack.getAmount();
-        return leftToAdd <= 0;
     }
 }

@@ -5,6 +5,7 @@ author: SirReason
 
 main: net.shadowraze.vendex.VendEx
 depends: [Vault, WorldGuard]
+soft-depends: [VotingRewards]
 
 commands:
   menu:

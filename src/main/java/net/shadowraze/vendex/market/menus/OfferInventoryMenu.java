@@ -1,4 +1,4 @@
-package net.shadowraze.vendex.menu.menus;
+package net.shadowraze.vendex.market.menus;
 
 import net.shadowraze.vendex.market.ShopOffer;
 import net.shadowraze.vendex.menu.Menu;
