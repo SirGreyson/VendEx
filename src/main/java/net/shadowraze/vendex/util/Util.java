@@ -2,6 +2,7 @@ package net.shadowraze.vendex.util;
 
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -51,7 +52,7 @@ public class Util {
     }
 
     public static String parseColor(String coloredString) {
-        return coloredString.replace("&", "§");
+        return ChatColor.translateAlternateColorCodes('&', coloredString);
     }
 
     public static String stripColor(String coloredString) {

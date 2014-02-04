@@ -167,7 +167,7 @@ public class Trade {
                 if(tradeInventory.getItem(slotID) != null) addTradeOffer(tradePlayer, new TradeOffer(tradePlayer, tradeInventory.getItem(slotID)));
     }
 
-    //TODO: Manage TradePlayers via HAshMAp and have set values of money / goldtokens offered instead of checking through shop offers 
+    //TODO: Manage TradePlayers via HAshMAp and have set values of money / goldtokens offered instead of checking through shop offers
     public void confirmTrade() {
         if(initiator.getPlayer() == null || invited.getPlayer() == null) cancelTrade(initiator.getPlayer() == null ? initiator.getName() : invited.getName());
         else {

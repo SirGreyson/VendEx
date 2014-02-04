@@ -75,7 +75,6 @@ tradeConfig:
   goldTokenItem: GOLD_INGOT
   tradeMenu:
     title: '&6VendEx Trading System'
-    size: 54
 
 #Plugin menu configuration
 menuConfig:
