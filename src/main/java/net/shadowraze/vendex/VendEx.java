@@ -11,22 +11,30 @@ import net.shadowraze.vendex.cmd.cmds.TradeCmd;
 import net.shadowraze.vendex.market.MarketManager;
 import net.shadowraze.vendex.menu.MenuHandler;
 import net.shadowraze.vendex.trade.TradeHandler;
+import net.shadowraze.vendex.util.Util;
 import net.shadowraze.vendex.util.Variables;
 import org.amhokies.votingRewards.VotingRewards;
 import org.amhokies.votingRewards.player.PlayerManager;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public class VendEx extends JavaPlugin implements Listener {
 
     public static Economy economy;
     public static Permission permission;
 
+    private static FileConfiguration persistenceConfig;
+
     public void onEnable() {
         if(!canEnable()) getServer().getPluginManager().disablePlugin(this);
+        saveDefaultConfig();
         new Variables(this).loadVariables();
         MarketManager.instance.loadShops(this);
         MenuHandler.getInstance().loadMenus(this);
@@ -44,6 +52,7 @@ public class VendEx extends JavaPlugin implements Listener {
     public void onDisable() {
         MarketManager.instance.saveShops(this);
         MarketManager.removeVendors();
+        MenuHandler.closeAllInventories();
         getLogger().info("has been disabled");
     }
 
@@ -72,5 +81,17 @@ public class VendEx extends JavaPlugin implements Listener {
 
     public static VendEx getPlugin() {
         return (VendEx) Bukkit.getPluginManager().getPlugin("VendEx");
+    }
+
+    public static FileConfiguration getPersistenceConfig() {
+        if(persistenceConfig != null) return persistenceConfig;
+        File configFile = new File(getPlugin().getDataFolder(), "persistenceConfig.yml");
+        Util.validateFile(configFile);
+        persistenceConfig = YamlConfiguration.loadConfiguration(configFile);
+        return persistenceConfig;
+    }
+
+    public static void savePersistenceConfig() {
+        Util.saveFile(new File(getPlugin().getDataFolder(), "persistenceConfig.yml"), getPersistenceConfig());
     }
 }

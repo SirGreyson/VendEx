@@ -42,6 +42,28 @@ public class Util {
         return tempStack;
     }
 
+    public static ItemStack metaStack(String name, String loreLine, Material material) {
+        ItemStack tempStack = new ItemStack(material);
+        ItemMeta tempMeta = tempStack.getItemMeta();
+        if(name != null) tempMeta.setDisplayName(parseColor(name));
+        List<String> parsedLore = new ArrayList<String>();
+        parsedLore.add(parseColor(loreLine));
+        tempMeta.setLore(parsedLore);
+        tempStack.setItemMeta(tempMeta);
+        return tempStack;
+    }
+
+    public static ItemStack metaStack(String name, String loreLine, Material material, Byte data) {
+        ItemStack tempStack = new ItemStack(material, 1, data);
+        ItemMeta tempMeta = tempStack.getItemMeta();
+        if(name != null) tempMeta.setDisplayName(parseColor(name));
+        List<String> parsedLore = new ArrayList<String>();
+        parsedLore.add(parseColor(loreLine));
+        tempMeta.setLore(parsedLore);
+        tempStack.setItemMeta(tempMeta);
+        return tempStack;
+    }
+
 
     public static boolean canAddItem(Inventory inventory, ItemStack addItem) {
         int leftToAdd = addItem.getAmount();
@@ -49,6 +71,12 @@ public class Util {
             if(itemStack == null) leftToAdd -= addItem.getMaxStackSize();
             else if(itemStack.isSimilar(itemStack)) leftToAdd -= addItem.getMaxStackSize() - itemStack.getAmount();
         return leftToAdd <= 0;
+    }
+
+    public static boolean canAddItems(Inventory inventory, List<ItemStack> addItems) {
+        for(ItemStack addItem : addItems)
+            if(!canAddItem(inventory, addItem)) return false;
+        return true;
     }
 
     public static String parseColor(String coloredString) {

@@ -44,12 +44,8 @@ public class PlayerMarketMenu extends Menu {
                 pageMap.get(i).setItem(j, shopStack(shopList.get(0)));
                 shopList.remove(0);
             }
-            pageMap.get(i).setItem(getSize() - 9, Util.metaStack("Previous Page", new ArrayList<String>() {{
-                add("Click to return to the previous page");
-            }}, Material.BOOK_AND_QUILL));
-            pageMap.get(i).setItem(getSize() - 1, Util.metaStack("Next Page", new ArrayList<String>() {{
-                add("Click to go to the next page");
-            }}, Material.BOOK_AND_QUILL));
+            pageMap.get(i).setItem(getSize() - 9, Util.metaStack("Previous Page", "Click to return to the previous page", Material.BOOK_AND_QUILL));
+            pageMap.get(i).setItem(getSize() - 1, Util.metaStack("Next Page", "Click to go to the next page", Material.BOOK_AND_QUILL));
         }
     }
 

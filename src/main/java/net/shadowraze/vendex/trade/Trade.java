@@ -3,215 +3,136 @@ package net.shadowraze.vendex.trade;
 import net.shadowraze.vendex.VendEx;
 import net.shadowraze.vendex.util.Messaging;
 import net.shadowraze.vendex.util.Util;
-import org.amhokies.votingRewards.VotingRewards;
 import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
-import org.bukkit.command.CommandSender;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Trade {
 
-    private TradePlayer initiator;
-    private TradePlayer invited;
-    private Map<TradePlayer, List<Integer>> offerSlots;
-    private Map<TradePlayer, List<TradeOffer>> tradeOffers;
-    private Map<TradePlayer, Boolean> hasAccepted;
-    private Map<TradePlayer, Integer> acceptButton;
-    private Map<TradePlayer, Integer> moneyOffered;
-    private Map<TradePlayer, Integer> gTokensOffered;
-    private Inventory tradeInventory;
-    private boolean isClosed;
+    private String requester;
+    private String requested;
+    private Map<String, Boolean> hasAccepted;
+    private Map<String, Integer> moneyOffered;
+    private Map<String, Integer> gTokensOffered;
 
-    public Trade(String initiator, String invited) {
-        this.initiator = new TradePlayer(initiator, this);
-        this.invited = new TradePlayer(invited, this);
-        this.offerSlots = new HashMap<TradePlayer, List<Integer>>();
-        this.tradeOffers = new HashMap<TradePlayer, List<TradeOffer>>();
-        this.hasAccepted = new HashMap<TradePlayer, Boolean>();
-        this.acceptButton = new HashMap<TradePlayer, Integer>();
-        this.moneyOffered = new HashMap<TradePlayer, Integer>();
-        this.gTokensOffered = new HashMap<TradePlayer, Integer>();
-        this.isClosed = false;
-        loadTradeInventory();
+    public Trade(String requester, String requested) {
+        this.requester = requester;
+        this.requested = requested;
+        this.hasAccepted = new HashMap<String, Boolean>();
+        this.moneyOffered = new HashMap<String, Integer>();
+        this.gTokensOffered = new HashMap<String, Integer>();
+        TradeHandler.TRADE_MENU.openMenu(this);
     }
 
-    //Initiator of Trade
-    public TradePlayer getInitiator() {
-        return initiator;
+    public String getRequester() {
+        return requester;
     }
 
-    //Invited to Trade
-    public TradePlayer getInvited() {
-        return invited;
+    public String getRequested() {
+        return requested;
     }
 
-    public TradePlayer getTradePlayer(String playerName) {
-        if(initiator.getName().equalsIgnoreCase(playerName)) return initiator;
-        else if(invited.getName().equalsIgnoreCase(playerName)) return invited;
-        return null;
+    public Player getPlayer(String playerName) {
+        return Bukkit.getPlayerExact(playerName);
     }
 
-    public TradePlayer[] getTradePlayers() {
-        return new TradePlayer[] {initiator, invited};
+    public boolean containsParticipant(String playerName) {
+        return requester.equalsIgnoreCase(playerName) || requested.equalsIgnoreCase(playerName);
     }
 
-    public List<Integer> getOfferSlots(TradePlayer tradePlayer) {
-        if(!offerSlots.containsKey(tradePlayer)) offerSlots.put(tradePlayer, new ArrayList<Integer>());
-        return offerSlots.get(tradePlayer);
+    public boolean isRequester(String playerName) {
+        return requester.equalsIgnoreCase(playerName);
     }
 
-    public List<TradeOffer> getTradeOffers(TradePlayer tradePlayer) {
-        if(!tradeOffers.containsKey(tradePlayer)) tradeOffers.put(tradePlayer, new ArrayList<TradeOffer>());
-        return tradeOffers.get(tradePlayer);
+    public Boolean hasAccepted(String playerName) {
+        if(!hasAccepted.containsKey(playerName)) hasAccepted.put(playerName, false);
+        return hasAccepted.get(playerName);
     }
 
-    public void addTradeOffer(TradePlayer tradePlayer, TradeOffer tradeOffer) {
-        if(tradeOffer.isMoney()) tradeInventory.setItem(moneyOffered.get(tradePlayer), currencyItem("MONEY", tradeOffer));
-        else if(tradeOffer.isGoldTokens()) tradeInventory.setItem(gTokensOffered.get(tradePlayer), currencyItem("GTOKENS", tradeOffer));
-        getTradeOffers(tradePlayer).add(tradeOffer);
-        if(hasAccepted(initiator)) setHasAccepted(initiator, false);
-        if(hasAccepted(invited)) setHasAccepted(invited, false);
+    public void setAccepted(String playerName, Boolean hasAccepted) {
+        this.hasAccepted.put(playerName, hasAccepted);
+        TradeHandler.TRADE_MENU.updateConfirmationItem(this, playerName);
+        if(hasAccepted(requester) && hasAccepted(requested)) confirmTrade();
     }
 
-    private ItemStack currencyItem(String currencyType, TradeOffer tradeOffer) {
-        if(currencyType.equalsIgnoreCase("MONEY")) return Util.metaStack("&6Money: &a" + tradeOffer.getCurrencyAmount(), new ArrayList<String>() {{
-            add("Money offered");
-        }}, TradeHandler.moneyItem);
-        else return Util.metaStack("&6Gold Tokens: &a" + tradeOffer.getCurrencyAmount(), new ArrayList<String>() {{
-            add("Gold Tokens offered");
-        }}, TradeHandler.gTokenItem);
+    public boolean canAccept(String playerName) {
+        if(Util.canAddItems(getPlayer(playerName).getInventory(), getTradeItems(playerName))) return true;
+        Messaging.sendErrorMessage(getPlayer(playerName), "You do not have enough free inventory space to accept this trade!");
+        return false;
     }
 
-    public void removeTradeOffer(TradePlayer tradePlayer, TradeOffer tradeOffer) {
-        getTradeOffers(tradePlayer).remove(tradeOffer);
-        if(hasAccepted(initiator)) setHasAccepted(initiator, false);
-        if(hasAccepted(invited)) setHasAccepted(invited, false);
+    public void resetAccepted() {
+        setAccepted(requester, false);
+        setAccepted(requested, false);
     }
 
-    public Boolean hasAccepted(TradePlayer tradePlayer) {
-        if(!hasAccepted.containsKey(tradePlayer)) hasAccepted.put(tradePlayer, false);
-        return hasAccepted.get(tradePlayer);
+    public int getMoneyOffered(String playerName) {
+        if(!moneyOffered.containsKey(playerName)) moneyOffered.put(playerName, 0);
+        return moneyOffered.get(playerName);
     }
 
-    private boolean canAcceptTrade(TradePlayer tradePlayer) {
-        for(TradeOffer tradeOffer : getTradeOffers(tradePlayer == initiator ? invited : initiator))
-            if(!Util.canAddItem(tradePlayer.getPlayer().getInventory(), tradeOffer.getItemStack())) {
-                Messaging.sendErrorMessage(tradePlayer.getPlayer(), "You do not have enough free inventory space to accept this trade!");
-                return false;
-            }
-        return true;
+    public void setMoneyOffered(String playerName, int moneyAmount) {
+        moneyOffered.put(playerName, moneyAmount);
+        TradeHandler.TRADE_MENU.updateMoneyOfferItem(this, playerName);
     }
 
-    public void setHasAccepted(TradePlayer tradePlayer, final Boolean hasAccepted) {
-        this.hasAccepted.put(tradePlayer, hasAccepted);
-        tradeInventory.setItem(acceptButton.get(tradePlayer), Util.metaStack("&6Offer: " + (hasAccepted ? "&aACCEPTED" : "&cNOT ACCEPTED"), new ArrayList<String>() {{
-            if(!hasAccepted) add("Click to accept the current offer");
-            else add("You have accepted the current offer!");
-        }}, Material.STAINED_GLASS_PANE, hasAccepted ? DyeColor.LIME.getData() : DyeColor.RED.getData()));
-        if(hasAccepted && tradePlayer == initiator ? hasAccepted(invited) : hasAccepted(initiator)) confirmTrade();
+    public int getGTokensOffered(String playerName) {
+        if(!gTokensOffered.containsKey(playerName)) gTokensOffered.put(playerName, 0);
+        return gTokensOffered.get(playerName);
     }
 
-    public Inventory getTradeInventory() {
-        return tradeInventory;
+    public void setGTokensOffered(String playerName, int gTokenAmount) {
+        gTokensOffered.put(playerName, gTokenAmount);
+        TradeHandler.TRADE_MENU.updateGTokenOfferItem(this, playerName);
     }
 
-    public void loadTradeInventory() {
-        this.tradeInventory = Bukkit.createInventory(null, TradeHandler.tradeMenuSize, TradeHandler.tradeMenuTitle);
-        tradeInventory.setContents(TradeHandler.defaultTradeMenu.getContents());
-        for(int i = 0; i < tradeInventory.getSize() / 9; i++) {
-            int slotCounter = 1;
-            for(int j = i * 9; j < (i + 1) * 9; j++) {
-                if(i < (tradeInventory.getSize() / 9) - 3) {
-                    if(slotCounter <= 4) getOfferSlots(initiator).add(j);
-                    else if(slotCounter <= 9) getOfferSlots(invited).add(j);
-                } else if(slotCounter == 3 || slotCounter == 7) acceptButton.put(slotCounter == 3 ? initiator : invited, j);
-                slotCounter++;
-            }
+    public void saveTradeItems(String playerName, List<ItemStack> tradeItems) {
+        for(int i = 0; i < tradeItems.size(); i++)
+            VendEx.getPersistenceConfig().set("savedTradeItems." + playerName + ".tradeItems." + i, tradeItems.get(i));
+        VendEx.savePersistenceConfig();
+    }
+
+    public List<ItemStack> getTradeItems(String playerName) {
+        return TradeHandler.TRADE_MENU.getTradeItems(this, isRequester(playerName));
+    }
+
+    public void giveTradeItems(Player toGive, String fromWho) {
+        for(ItemStack tradeItem : getTradeItems(fromWho))
+            toGive.getInventory().addItem(tradeItem);
+        toGive.updateInventory();
+        if(fromWho.equalsIgnoreCase(toGive.getName())) return;
+        VendEx.economy.withdrawPlayer(fromWho, getMoneyOffered(fromWho));
+        VendEx.economy.depositPlayer(toGive.getName(), getMoneyOffered(fromWho));
+        if(VendEx.getVotingRewards() != null) {
+            VendEx.getVotingRewards().getPlayer(fromWho).addGTokens(-getGTokensOffered(fromWho));
+            VendEx.getVotingRewards().getPlayer(toGive.getName()).addGTokens(getGTokensOffered(fromWho));
         }
     }
 
-    public void openTradeInventory() {
-        initiator.getPlayer().openInventory(tradeInventory);
-        invited.getPlayer().openInventory(tradeInventory);
-    }
-
-    public void closeTradeInventory() {
-        if(initiator.getPlayer() != null && initiator.getPlayer().getOpenInventory() != null) initiator.getPlayer().closeInventory();
-        if(invited.getPlayer() != null && invited.getPlayer().getOpenInventory() != null) invited.getPlayer().closeInventory();
-    }
-
-    public void cancelTrade(String whoCancelled) {
-        String playerCancelled = whoCancelled + " has cancelled the trade";
-        String selfCancelled = "You have cancelled the trade";
-        this.isClosed = true;
-        for(TradePlayer tradePlayer : tradeOffers.keySet()) {
-            if(tradePlayer.getPlayer() != null) Messaging.sendErrorMessage(tradePlayer.getPlayer(), tradePlayer.getName().equalsIgnoreCase(whoCancelled) ? selfCancelled : playerCancelled);
-            for(Integer slotID : getOfferSlots(tradePlayer))
-                if(tradeInventory.getItem(slotID) != null) tradePlayer.getPlayer().getInventory().addItem(tradeInventory.getItem(slotID));
-        }
-        closeTradeInventory();
-    }
-
-    private void updateTradeOffers() {
-        for(TradePlayer tradePlayer : offerSlots.keySet())
-            for(Integer slotID : offerSlots.get(tradePlayer))
-                if(tradeInventory.getItem(slotID) != null) addTradeOffer(tradePlayer, new TradeOffer(tradePlayer, tradeInventory.getItem(slotID)));
-    }
-
-    //TODO: Manage TradePlayers via HAshMAp and have set values of money / goldtokens offered instead of checking through shop offers
     public void confirmTrade() {
-        if(initiator.getPlayer() == null || invited.getPlayer() == null) cancelTrade(initiator.getPlayer() == null ? initiator.getName() : invited.getName());
-        else {
-            for(TradeOffer tradeOffer : getTradeOffers(initiator))
-                if(tradeOffer.isMoney()) {
-                    VendEx.economy.withdrawPlayer(initiator.getName(), tradeOffer.getCurrencyAmount());
-                    VendEx.economy.depositPlayer(invited.getName(), tradeOffer.getCurrencyAmount());
-                } else if(tradeOffer.isGoldTokens()) {
-                    VendEx.getVotingRewards().getPlayer(initiator.getName()).addGTokens(-tradeOffer.getCurrencyAmount());
-                    VendEx.getVotingRewards().getPlayer(invited.getName()).addGTokens(tradeOffer.getCurrencyAmount());
-                } else invited.getPlayer().getInventory().addItem(tradeOffer.getItemStack());
-            for(TradeOffer tradeOffer : getTradeOffers(invited))
-                if(tradeOffer.isMoney()) {
-                    VendEx.economy.withdrawPlayer(invited.getName(), tradeOffer.getCurrencyAmount());
-                    VendEx.economy.depositPlayer(initiator.getName(), tradeOffer.getCurrencyAmount());
-                } else if(tradeOffer.isGoldTokens()) {
-                    VotingRewards.getPlayerManager().getPlayer(invited.getName()).addGTokens(-tradeOffer.getCurrencyAmount());
-                    VotingRewards.getPlayerManager().getPlayer(initiator.getName()).addGTokens(tradeOffer.getCurrencyAmount());
-                } else initiator.getPlayer().getInventory().addItem(tradeOffer.getItemStack());
-            closeTradeInventory();
-            Messaging.sendMessage(initiator.getPlayer(), "&aTrade successful!");
-            Messaging.sendMessage(invited.getPlayer(), "&aTrade successful!");
-        }
+        giveTradeItems(getPlayer(requester), requested);
+        giveTradeItems(getPlayer(requested), requester);
+        TradeHandler.getInstance().removeTrade(this);
+        getPlayer(requester).closeInventory();
+        getPlayer(requested).closeInventory();
+        Messaging.sendMessage(getPlayer(requester), "&aTrade successful!");
+        Messaging.sendMessage(getPlayer(requested), "&aTrade successful!");
     }
 
-
-    public void onClick(InventoryClickEvent e) {
-        TradePlayer tradePlayer = getTradePlayer(e.getWhoClicked().getName());
-        if(tradePlayer == null) {
-            Messaging.sendErrorMessage((CommandSender) e.getWhoClicked(), "Something went wrong! Please report this to an admin!");
-            cancelTrade(e.getWhoClicked().getName());
-        } else {
-            if(e.getRawSlot() < TradeHandler.tradeMenuSize && !getOfferSlots(tradePlayer).contains(e.getRawSlot())) e.setCancelled(true);
-            if(getOfferSlots(tradePlayer).contains(e.getRawSlot())) updateTradeOffers();
-            if(e.getRawSlot() == acceptButton.get(tradePlayer)) setHasAccepted(tradePlayer, !hasAccepted(tradePlayer));
-            else if(e.getRawSlot() == TradeHandler.tradeMenuSize - 4) e.setCancelled(true);//TODO: open gold token menu
-            else if(e.getRawSlot() == TradeHandler.tradeMenuSize - 5) cancelTrade(e.getWhoClicked().getName());
-            else if(e.getRawSlot() == TradeHandler.tradeMenuSize - 6) e.setCancelled(true); //TODO: open money menu
-        }
-    }
-
-    public void onClose(InventoryCloseEvent e) {
-        if(isClosed) return;
-        if(!hasAccepted(initiator) || !hasAccepted(invited))
-            cancelTrade(e.getPlayer().getName());
+    public void cancelTrade(String playerName) {
+        Player whoCancelled = getPlayer(playerName);
+        Player otherPlayer = getPlayer(isRequester(playerName) ? requested : requester);
+        if(whoCancelled != null) {
+            Messaging.sendErrorMessage(whoCancelled, "You have cancelled the trade!");
+            giveTradeItems(whoCancelled, playerName);
+        } else if(whoCancelled == null) saveTradeItems(playerName, getTradeItems(playerName));
+        Messaging.sendErrorMessage(otherPlayer, playerName + " has cancelled the trade!");
+        giveTradeItems(otherPlayer, otherPlayer.getName());
+        TradeHandler.getInstance().removeTrade(this);
+        otherPlayer.getOpenInventory().close();
     }
 }

@@ -42,8 +42,6 @@ shopConfig:
     - BEACON
     - OBSIDIAN
   vendorName: '&cShadowRaze Vendor'
-  vendorLocations: 
-    - 0,0,0,world
   #Server Shop title and size  
   serverShop:
     title: '&6Server Shop'
@@ -71,10 +69,16 @@ tradeConfig:
   antiSpamInterval: 5
   #Time before trade invites expire in seconds
   tradeInviteExpireInterval: 60
+  #Money item material in menu
   moneyItem: PAPER
+  #Gold token item material in menu
   goldTokenItem: GOLD_INGOT
   tradeMenu:
     title: '&6VendEx Trading System'
+  addMoneyMenu:
+    title: '&6Set Money offer amount:'
+  addGTokenMenu:
+    title: '&6Set Gold Token offer amount:'
 
 #Plugin menu configuration
 menuConfig:

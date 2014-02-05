@@ -1,101 +1,112 @@
 package net.shadowraze.vendex.trade;
 
 import net.shadowraze.vendex.VendEx;
+import net.shadowraze.vendex.trade.menus.AddGTokenMenu;
+import net.shadowraze.vendex.trade.menus.AddMoneyMenu;
+import net.shadowraze.vendex.trade.menus.TradeMenu;
 import net.shadowraze.vendex.util.Messaging;
 import net.shadowraze.vendex.util.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.inventory.Inventory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TradeHandler implements Listener {
 
-    public static TradeHandler instance = new TradeHandler();
-    public static ConfigurationSection tradeConfig = VendEx.getPlugin().getConfig().getConfigurationSection("tradeConfig");
-    public static int antiSpamInterval = tradeConfig.getInt("antiSpamInterval");
-    public static int inviteExpireInterval = tradeConfig.getInt("tradeInviteExpireInterval");
-    public static List<Material> tradeBlackList;
-    public static Material moneyItem = Material.valueOf(tradeConfig.getString("moneyItem"));
-    public static Material gTokenItem = Material.valueOf(tradeConfig.getString("goldTokenItem"));
-    public static String tradeMenuTitle = Util.parseColor(tradeConfig.getString("tradeMenu.title"));
-    public static int tradeMenuSize = tradeConfig.getInt("tradeMenu.size");
+    private static TradeHandler instance = new TradeHandler();
+    private static ConfigurationSection tradeConfig = VendEx.getPlugin().getConfig().getConfigurationSection("tradeConfig");
 
-    public static Map<String, Trade> tradeMap = new HashMap<String, Trade>();
-    public static Inventory defaultTradeMenu = getDefaultTradeMenu();
+    public static TradeMenu TRADE_MENU = new TradeMenu(Util.parseColor(tradeConfig.getString("tradeMenu.title")), 54);
+    public static AddMoneyMenu ADD_MONEY_MENU = new AddMoneyMenu(Util.parseColor(tradeConfig.getString("addMoneyMenu.title")), 9);
+    public static AddGTokenMenu ADD_GTOKEN_MENU = new AddGTokenMenu(Util.parseColor(tradeConfig.getString("addGTokenMenu.title")), 9);
+
+    private List<Material> tradeBlackList;
+    private Material moneyItem;
+    private Material gTokenItem;
+    private int antiSpamInterval;
+    private int tradeInviteExpireInterval;
+
+    private List<Trade> tradeList;
+    private List<String> tradeDisabled;
+    private Map<String, String> inviteMap = new HashMap<String, String>();
+    private Map<String, Long> inviteTime = new HashMap<String, Long>();
+    private Map<String, Long> antiSpamMap = new HashMap<String, Long>();
 
     public static TradeHandler getInstance() {
         return instance;
     }
 
-    private static Inventory getDefaultTradeMenu() {
-        Inventory tradeInventory = Bukkit.createInventory(null, tradeMenuSize, tradeMenuTitle);
-        for (int i = 0; i < tradeInventory.getSize() / 9; i++) {
-            int slotCounter = 1;
-            for (int j = i * 9; j < (i + 1) * 9; j++) {
-                if (i == (tradeInventory.getSize() / 9) - 3) {
-                    if(slotCounter == 2 || slotCounter == 7)
-                        tradeInventory.setItem(j, Util.metaStack("&6Money: &a0", new ArrayList<String>() {{
-                            add("Money offered");
-                        }}, TradeHandler.moneyItem));
-                    else if(slotCounter == 3 || slotCounter == 8)
-                        tradeInventory.setItem(j, Util.metaStack("&6Gold Tokens: &a0", new ArrayList<String>() {{
-                            add("Gold Tokens offered");
-                        }}, TradeHandler.gTokenItem));
-                    else if(slotCounter == 5)
-                        tradeInventory.setItem(j, Util.metaStack(" ", new ArrayList<String>(), Material.STAINED_GLASS_PANE, DyeColor.BLACK.getData()));
-                    slotCounter++;
-                }
-                else if (i == (tradeInventory.getSize() / 9) - 2)
-                    tradeInventory.setItem(j, Util.metaStack(" ", new ArrayList<String>(), Material.STAINED_GLASS_PANE, DyeColor.BLACK.getData()));
-                else if (i == (tradeInventory.getSize() / 9) - 1) {
-                    if (slotCounter == 3 || slotCounter == 7) {
-                        tradeInventory.setItem(j, Util.metaStack("&6Offer: &cNOT ACCEPTED", new ArrayList<String>() {{
-                            add("Click to accept the current offer");
-                        }}, Material.STAINED_GLASS_PANE, DyeColor.RED.getData()));
-                    } else if (slotCounter == 4)
-                        tradeInventory.setItem(j, Util.metaStack("&6Offer Money", new ArrayList<String>() {{
-                            add("Click to add money to the trade");
-                        }}, TradeHandler.moneyItem));
-                    else if (slotCounter == 5)
-                        tradeInventory.setItem(j, Util.metaStack("&4Leave Trade", new ArrayList<String>() {{
-                            add("Click to close the trade menu without trading");
-                        }}, Material.STATIONARY_LAVA));
-                    else if (slotCounter == 6)
-                        tradeInventory.setItem(j, Util.metaStack("&6Offer Gold Tokens", new ArrayList<String>() {{
-                            add("Click to add golden tokens to the trade");
-                        }}, TradeHandler.gTokenItem));
-                    slotCounter++;
-                } else {
-                    if(slotCounter == 5)
-                        tradeInventory.setItem(j, Util.metaStack(" ", new ArrayList<String>(), Material.STAINED_GLASS_PANE, DyeColor.BLACK.getData()));
-                        slotCounter++;
-                }
-            }
-        }
-        return tradeInventory;
+    public List<Trade> getTradeList() {
+        if(tradeList == null) tradeList = new ArrayList<Trade>();
+        return tradeList;
     }
 
-    public static void startTrade(String initiator, String invited) {
-        Trade newTrade = new Trade(initiator, invited);
-        tradeMap.put(initiator, newTrade);
-        tradeMap.put(invited, newTrade);
-        newTrade.openTradeInventory();
+    public boolean canAcceptTradeInvite(Player tradePlayer) {
+        if(!inviteMap.containsKey(tradePlayer.getName())) Messaging.sendErrorMessage(tradePlayer, "You have no pending trade invitations!");
+        else if(getPlayerTrade(getInviter(tradePlayer.getName())) != null) {
+            Messaging.sendErrorMessage(tradePlayer, "Sorry, that player is already in another trade!");
+            inviteMap.remove(tradePlayer.getName());
+            inviteTime.remove(tradePlayer.getName());
+        } else if(Bukkit.getPlayerExact(getInviter(tradePlayer.getName())) == null) {
+            Messaging.sendErrorMessage(tradePlayer, "Sorry, the player who invited you is no longer online!");
+            inviteMap.remove(tradePlayer.getName());
+            inviteTime.remove(tradePlayer.getName());
+        } else if(System.currentTimeMillis() - inviteTime.get(tradePlayer.getName()) > (getInviteExpireInterval() * 1000)) {
+            Messaging.sendErrorMessage(tradePlayer, "Sorry, that trade invitation has expired!");
+            inviteMap.remove(tradePlayer.getName());
+            inviteTime.remove(tradePlayer.getName());
+        } else return true;
+        return false;
     }
 
-    public static List<Material> getTradeBlackList() {
+    public void createTrade(String requester, String requested) {
+        getTradeList().add(new Trade(requester, requested));
+        inviteMap.remove(requested);
+        inviteTime.remove(requested);
+    }
+
+    public void removeTrade(Trade remTrade) {
+        getTradeList().remove(remTrade);
+        TRADE_MENU.tradeMap.remove(remTrade);
+    }
+
+    public Trade getPlayerTrade(String playerName) {
+        for(Trade trade : getTradeList())
+            if(trade.containsParticipant(playerName)) return trade;
+        return null;
+    }
+
+    public boolean isTradeDisabled(String playerName) {
+        if(tradeDisabled == null) tradeDisabled = VendEx.getPersistenceConfig().getStringList("tradeDisabled");
+        return tradeDisabled.contains(playerName);
+    }
+
+    public void toggleTradeEnabled(String playerName) {
+        if(isTradeDisabled(playerName)) tradeDisabled.remove(playerName);
+        else tradeDisabled.add(playerName);
+        VendEx.getPersistenceConfig().set("tradeDisabled", tradeDisabled);
+        VendEx.savePersistenceConfig();
+    }
+
+    public void invitePlayer(Player inviter, Player invited) {
+        inviteMap.put(invited.getName(), inviter.getName());
+        inviteTime.put(invited.getName(), System.currentTimeMillis());
+        antiSpamMap.put(inviter.getName(), System.currentTimeMillis());
+        Messaging.sendMessage(inviter, "&aYou have sent a trade invite to &b" + invited.getName());
+        Messaging.sendMessage(invited, "&b" + inviter.getName() + " &ahas invited you to trade! Type &b/trade accept&a to trade");
+    }
+
+    public String getInviter(String invited) {
+        if(inviteMap.containsKey(invited)) return inviteMap.get(invited);
+        return null;
+    }
+
+    public List<Material> getTradeBlackList() {
         if(tradeBlackList != null) return tradeBlackList;
         tradeBlackList = new ArrayList<Material>();
         for(String material : tradeConfig.getStringList("blackList"))
@@ -103,30 +114,36 @@ public class TradeHandler implements Listener {
         return tradeBlackList;
     }
 
+    public Material getMoneyItem() {
+        if(moneyItem == null) moneyItem = Material.valueOf(tradeConfig.getString("moneyItem"));
+        return moneyItem;
+    }
+
+    public Material getGTokenItem() {
+        if(gTokenItem == null) gTokenItem = Material.valueOf(tradeConfig.getString("goldTokenItem"));
+        return gTokenItem;
+    }
+
+    public int getAntiSpamInterval() {
+        if(antiSpamInterval == 0) antiSpamInterval = tradeConfig.getInt("antiSpamInterval");
+        return antiSpamInterval;
+    }
+
+    public int getInviteExpireInterval() {
+        if(tradeInviteExpireInterval == 0) tradeInviteExpireInterval = tradeConfig.getInt("tradeInviteExpireInterval");
+        return tradeInviteExpireInterval;
+    }
+
     @EventHandler
-    public void onInvite(PlayerInteractEntityEvent e) {
+    public void onPlayerInvite(PlayerInteractEntityEvent e) {
         if(!(e.getRightClicked() instanceof Player)) return;
         if(!e.getPlayer().isSneaking()) return;
-        Player clickedPlayer = (Player) e.getRightClicked();
-        if(tradeMap.containsKey(clickedPlayer.getName())) {
-            Messaging.sendErrorMessage(e.getPlayer(), "This player is already trading with someone!");
-            return;
-        }
-        startTrade(e.getPlayer().getName(), clickedPlayer.getName());
-    }
-
-    @EventHandler
-    public void onClick(InventoryClickEvent e) {
-        if(!tradeMap.containsKey(e.getWhoClicked().getName())) return;
-        if(!ChatColor.stripColor(e.getInventory().getTitle()).equalsIgnoreCase(Util.stripColor(tradeMenuTitle))) return;
-        tradeMap.get(e.getWhoClicked().getName()).onClick(e);
-    }
-
-    @EventHandler
-    public void onClose(InventoryCloseEvent e) {
-        if(!tradeMap.containsKey(e.getPlayer().getName())) return;
-        if(!ChatColor.stripColor(e.getInventory().getTitle()).equalsIgnoreCase(Util.stripColor(tradeMenuTitle))) return;
-        tradeMap.get(e.getPlayer().getName()).onClose(e);
-        tradeMap.remove(e.getPlayer().getName());
+        if(isTradeDisabled(((Player) e.getRightClicked()).getName())) Messaging.sendErrorMessage(e.getPlayer(), "This player is not accepting trade invites at this time!");
+        else if(antiSpamMap.containsKey(e.getPlayer().getName()) && (System.currentTimeMillis() - antiSpamMap.get(e.getPlayer().getName())) / 1000 <= getAntiSpamInterval())
+            Messaging.sendErrorMessage(e.getPlayer(), "You must wait before you can send another trade invite!");
+        else if(inviteMap.containsKey(((Player) e.getRightClicked()).getName()) && inviteMap.get(((Player) e.getRightClicked()).getName()).equalsIgnoreCase(e.getPlayer().getName()) &&
+                (System.currentTimeMillis() - inviteTime.get(((Player) e.getRightClicked()).getName())) / 1000 < getInviteExpireInterval())
+            Messaging.sendErrorMessage(e.getPlayer(), "This player already has a pending trade invite from you!");
+        else invitePlayer(e.getPlayer(), (Player) e.getRightClicked());
     }
 }

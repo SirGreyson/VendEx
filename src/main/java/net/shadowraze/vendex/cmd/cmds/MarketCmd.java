@@ -17,7 +17,6 @@ public class MarketCmd extends RootCommand {
 
     @Override
     public void registerSubCommands() {
-        registerSubCommand("setregion", new SetRegion());
         registerSubCommand("getblacklist", new GetBlackList());
         registerSubCommand("addvendor", new AddVendor());
         registerSubCommand("removevendor", new RemoveVendor());
@@ -38,30 +37,10 @@ public class MarketCmd extends RootCommand {
     @Override
     public String helpMessage() {
         return ChatColor.BLUE + "Available Market Options:\n" +
-                "setregion - set the name of the market region\n" +
                 "getblacklist- get a list of blacklisted materials\n" +
                 "addvendor - add a new vendor at your location\n" +
                 "removevendor <index> - remove a vendor with the given index\n" +
                 "listvendors - list vendors and their respective index";
-    }
-
-    class SetRegion implements SubCommand {
-
-        @Override
-        public boolean onCommand(Player player, String[] args) {
-                if(args.length != 2) Messaging.sendMessage(player, helpMessage());
-                else {
-                    VendEx.getPlugin().getConfig().set("worldGuard.regionName", args[1]);
-                    VendEx.getPlugin().saveConfig();
-                    Messaging.sendMessage(player, Variables.MESSAGES.get("wgRegionSet"));
-                }
-            return true;
-        }
-
-        @Override
-        public String helpMessage() {
-            return ChatColor.RED + "Syntax error! Try /market setregion <name>";
-        }
     }
 
     class GetBlackList implements SubCommand {

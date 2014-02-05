@@ -3,14 +3,18 @@ package net.shadowraze.vendex.menu;
 import net.shadowraze.vendex.VendEx;
 import net.shadowraze.vendex.market.MarketManager;
 import net.shadowraze.vendex.market.menus.*;
-import net.shadowraze.vendex.menu.menus.*;
+import net.shadowraze.vendex.menu.menus.AdminMenu;
+import net.shadowraze.vendex.menu.menus.VendExMenu;
 import net.shadowraze.vendex.util.Util;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -70,5 +74,18 @@ public class MenuHandler implements Listener {
         if(!menuMap.containsKey(invTitle)) return;
         if(menuMap.get(invTitle).getSize() != e.getInventory().getSize()) return;
         menuMap.get(invTitle).onMenuClose(e);
+    }
+
+    @EventHandler
+    public void onMenuDrag(InventoryDragEvent e) {
+        String invTitle = ChatColor.stripColor(e.getInventory().getTitle());
+        if(!menuMap.containsKey(invTitle)) return;
+        e.setCancelled(true);
+    }
+
+    public static void closeAllInventories() {
+        VendEx.getPlugin().getLogger().info("Closing all open inventories...");
+        for(Player player : Bukkit.getServer().getOnlinePlayers())
+            if(player.getOpenInventory() != null) player.closeInventory();
     }
 }

@@ -137,7 +137,7 @@ public class MarketManager {
     public static Map<Location, Villager> getVendors() {
         if(vendorMap != null) return vendorMap;
         vendorMap = new HashMap<Location, Villager>();
-        for(String locString : VendEx.getPlugin().getConfig().getStringList("shopConfig.vendorLocations"))
+        for(String locString : VendEx.getPersistenceConfig().getStringList("vendorLocations"))
             vendorMap.put(Util.parseLocString(locString), vendorVillager(Util.parseLocString(locString)));
         return vendorMap;
     }
@@ -146,8 +146,8 @@ public class MarketManager {
         List<String> locList = new ArrayList<String>();
         for(Location loc : getVendors().keySet())
             locList.add(Util.parseLocation(loc));
-        VendEx.getPlugin().getConfig().set("shopConfig.vendorLocations", locList);
-        VendEx.getPlugin().saveConfig();
+        VendEx.getPersistenceConfig().set("vendorLocations", locList);
+        VendEx.savePersistenceConfig();
     }
 
     public static void removeVendors() {

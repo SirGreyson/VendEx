@@ -5,18 +5,30 @@ import net.shadowraze.vendex.menu.MenuHandler;
 import net.shadowraze.vendex.util.Util;
 import net.shadowraze.vendex.util.Variables;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerListener implements Listener {
 
     private VendEx plugin;
     public PlayerListener(VendEx plugin) {
         this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        if(VendEx.getPersistenceConfig().getConfigurationSection("savedTradeItems." + e.getPlayer().getName()) == null) return;
+        ConfigurationSection iSec = VendEx.getPersistenceConfig().getConfigurationSection("savedTradeItems." + e.getPlayer().getName() + ".tradeItems");
+        for(int i = 0; i < 12; i++) {
+            if(iSec.getItemStack(String.valueOf(i)) == null) break;
+            e.getPlayer().getInventory().addItem(iSec.getItemStack(String.valueOf(i)));
+        }
     }
 
     @EventHandler
