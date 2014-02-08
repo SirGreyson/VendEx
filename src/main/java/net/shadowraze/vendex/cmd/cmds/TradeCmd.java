@@ -17,7 +17,8 @@ public class TradeCmd extends RootCommand {
 
     @Override
     public boolean onCommand(Player player, String[] args) {
-        if(getSubCommands().containsKey(args[0].toLowerCase())) getSubCommands().get(args[0].toLowerCase()).onCommand(player, args);
+        if(args.length == 0) Messaging.sendMessage(player, helpMessage());
+        else if(getSubCommands().containsKey(args[0].toLowerCase())) getSubCommands().get(args[0].toLowerCase()).onCommand(player, args);
         else Messaging.sendMessage(player, helpMessage());
         return true;
     }

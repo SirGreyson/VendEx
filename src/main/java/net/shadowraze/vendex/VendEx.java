@@ -62,6 +62,7 @@ public class VendEx extends JavaPlugin implements Listener {
         RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
         RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
         if(permissionProvider != null && economyProvider != null) {
+            getLogger().info("Registering Permissions with Vault");
             permission = getServer().getServicesManager().getRegistration(Permission.class).getProvider();
             economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
         }

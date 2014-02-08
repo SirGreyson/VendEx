@@ -6,11 +6,10 @@ import net.shadowraze.vendex.util.Util;
 import net.shadowraze.vendex.util.Variables;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -41,8 +40,8 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onVendorDamage(EntityDamageByEntityEvent e) {
-        if(!(e.getEntity() instanceof Villager) || !(e.getDamager() instanceof Player)) return;
+    public void onVendorDamage(EntityDamageEvent e) {
+        if(!(e.getEntity() instanceof Villager)) return;
         if(!Util.isInRegion(e.getEntity(), Variables.WG_REGION)) return;
         e.setCancelled(true);
     }

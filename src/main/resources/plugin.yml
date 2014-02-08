@@ -1,11 +1,11 @@
 name: VendEx
-version: 1.0
+version: 1.1
 description: Player vending plugin for Shadowraze Network
 author: SirReason
 
 main: net.shadowraze.vendex.VendEx
-depends: [Vault, WorldGuard]
-soft-depends: [VotingRewards]
+depend: [Vault, WorldGuard]
+softdepend: [VotingRewards]
 
 commands:
   menu:

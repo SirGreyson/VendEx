@@ -30,7 +30,7 @@ public class MarketCmd extends RootCommand {
             else if(args.length <= 2 && getSubCommands().containsKey(args[0].toLowerCase()))
                 getSubCommands().get(args[0].toLowerCase()).onCommand(player, args);
             else Messaging.sendMessage(player, helpMessage());
-        }
+        } else Messaging.sendErrorMessage(player, "You do not have permission to use this command!");
         return true;
     }
 
@@ -62,6 +62,7 @@ public class MarketCmd extends RootCommand {
         @Override
         public boolean onCommand(Player player, String[] args) {
                 if(Util.isInRegion(player, Variables.WG_REGION)) {
+                    Messaging.sendMessage(player, "Vendor added to your location!");
                     MarketManager.getVendors().put(player.getLocation(), MarketManager.vendorVillager(player.getLocation()));
                     MarketManager.saveVendors();
                 } else Messaging.sendErrorMessage(player, "Error! You cannot place a vendor outside of the market region!");

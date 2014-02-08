@@ -100,9 +100,7 @@ public class TradeMenu extends Menu {
 
     @Override
     public void onMenuClose(InventoryCloseEvent e) {
-        if(e.getPlayer().getOpenInventory() != null)
-            if(e.getPlayer().getOpenInventory().getTitle().equalsIgnoreCase(TradeHandler.ADD_MONEY_MENU.getTitle()) ||
-            e.getPlayer().getOpenInventory().getTitle().equalsIgnoreCase(TradeHandler.ADD_GTOKEN_MENU.getTitle())) return;
+        if(e.getPlayer().getOpenInventory() != null && MenuHandler.isMenuInventory(e.getPlayer().getOpenInventory().getTitle())) return;
         Trade playerTrade = TradeHandler.getInstance().getPlayerTrade(e.getPlayer().getName());
         if(playerTrade == null) return;
         playerTrade.cancelTrade(e.getPlayer().getName());

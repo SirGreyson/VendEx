@@ -35,7 +35,7 @@ public class Variables {
             ERRMESSAGES.put(errMessage, Util.parseColor(plugin.getConfig().getString("errMessages." + errMessage)));
 
         WG_ENABLED = plugin.getConfig().getBoolean("worldGuard.enabled");
-        WG_REGION = WGBukkit.getRegionManager(Bukkit.getWorld(plugin.getConfig().getString("worldGuard.world"))).getRegionExact(plugin.getConfig().getString("worldGuard.regionName"));
+        if(WG_ENABLED) WG_REGION = WGBukkit.getRegionManager(Bukkit.getWorld(plugin.getConfig().getString("worldGuard.world"))).getRegionExact(plugin.getConfig().getString("worldGuard.regionName"));
         REGION_ERROR_MSG = plugin.getConfig().getString("worldGuard.errorMsg");
     }
 }

@@ -23,7 +23,7 @@ public class MenuHandler implements Listener {
 
     private static MenuHandler instance = new MenuHandler();
     public static ConfigurationSection menuConfig = VendEx.getPlugin().getConfig().getConfigurationSection("menuConfig");
-    private Map<String, Menu> menuMap = new HashMap<String, Menu>();
+    private static Map<String, Menu> menuMap = new HashMap<String, Menu>();
 
     public static VendExMenu VENDEX_MENU = new VendExMenu(Util.parseColor(menuConfig.getString("vendExMenu.title")), menuConfig.getInt("vendExMenu.size"));
     public static AdminMenu ADMIN_MENU = new AdminMenu(Util.parseColor(menuConfig.getString("adminMenu.title")), menuConfig.getInt("adminMenu.size"));
@@ -50,6 +50,12 @@ public class MenuHandler implements Listener {
         registerMenu(ChatColor.stripColor(REMOVE_OFFER_MENU.getTitle()), REMOVE_OFFER_MENU);
         registerMenu(ChatColor.stripColor(INVENTORY_MENU.getTitle()), INVENTORY_MENU);
         registerMenu(ChatColor.stripColor(MARKET_MENU.getTitle()), MARKET_MENU);
+    }
+
+    public static boolean isMenuInventory(String inventoryTitle) {
+        String invTitle = ChatColor.stripColor(inventoryTitle);
+        if(menuMap.containsKey(invTitle)) return true;
+        return false;
     }
 
     public void registerMenu(String title, Menu newMenu) {
