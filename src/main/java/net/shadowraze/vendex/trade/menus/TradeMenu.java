@@ -1,5 +1,6 @@
 package net.shadowraze.vendex.trade.menus;
 
+import net.shadowraze.vendex.VendEx;
 import net.shadowraze.vendex.menu.Menu;
 import net.shadowraze.vendex.menu.MenuHandler;
 import net.shadowraze.vendex.trade.Trade;
@@ -99,11 +100,16 @@ public class TradeMenu extends Menu {
     }
 
     @Override
-    public void onMenuClose(InventoryCloseEvent e) {
-        if(e.getPlayer().getOpenInventory() != null && MenuHandler.isMenuInventory(e.getPlayer().getOpenInventory().getTitle())) return;
-        Trade playerTrade = TradeHandler.getInstance().getPlayerTrade(e.getPlayer().getName());
-        if(playerTrade == null) return;
-        playerTrade.cancelTrade(e.getPlayer().getName());
+    public void onMenuClose(final InventoryCloseEvent e) {
+        Bukkit.getScheduler().runTaskLater(VendEx.getPlugin(), new Runnable() {
+            @Override
+            public void run() {
+                if(e.getPlayer().getOpenInventory() != null && MenuHandler.isMenuInventory(e.getPlayer().getOpenInventory().getTitle())) return;
+                Trade playerTrade = TradeHandler.getInstance().getPlayerTrade(e.getPlayer().getName());
+                if(playerTrade == null) return;
+                playerTrade.cancelTrade(e.getPlayer().getName());
+            }
+        }, 10L);
     }
 
     public List<Integer> getOfferSlots(boolean isRequester) {
