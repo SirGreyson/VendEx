@@ -37,7 +37,7 @@ public class AddMoneyMenu extends Menu {
         defaultMenu = Bukkit.createInventory(null, getSize(), getTitle());
         for(int i = 0; i < getSize(); i++) {
             if(i == 0) defaultMenu.setItem(i, offerGoodStack);
-            else if(i > 2 && i < 6) defaultMenu.setItem(i, digitStack(i, 0));
+            else if(i > 1 && i < 7) defaultMenu.setItem(i, digitStack(i, 0));
             else if(i == 8) defaultMenu.setItem(i, confirmStack(true, 0));
         }
     }
@@ -52,7 +52,7 @@ public class AddMoneyMenu extends Menu {
     @Override
     public void onMenuClick(InventoryClickEvent e) {
         e.setCancelled(true);
-        if(e.getRawSlot() > 2 && e.getRawSlot() < 6) {
+        if(e.getRawSlot() > 1 && e.getRawSlot() < 7) {
             if(e.getCurrentItem().getType() == Material.EMPTY_MAP) e.getInventory().setItem(e.getRawSlot(), digitStack(e.getSlot(), 1));
             else e.getInventory().setItem(e.getRawSlot(), digitStack(e.getSlot(), e.getCurrentItem().getAmount() == 9 ? 0 : e.getCurrentItem().getAmount() + 1));
             int moneyAmount = getMoneyAmount(e.getInventory());
@@ -85,14 +85,18 @@ public class AddMoneyMenu extends Menu {
     }
 
     public int getMoneyAmount(Inventory menuInv) {
-        return (menuInv.getItem(3).getType() == Material.EMPTY_MAP ? 0 : menuInv.getItem(3).getAmount() * 100)
-                + (menuInv.getItem(4).getType() == Material.EMPTY_MAP ? 0 : menuInv.getItem(4).getAmount() * 10)
-                + (menuInv.getItem(5).getType() == Material.EMPTY_MAP ? 0 : menuInv.getItem(5).getAmount());
+        return (menuInv.getItem(2).getType() == Material.EMPTY_MAP ? 0 : menuInv.getItem(2).getAmount() * 10000)
+                + (menuInv.getItem(3).getType() == Material.EMPTY_MAP ? 0 : menuInv.getItem(3).getAmount() * 1000)
+                + (menuInv.getItem(4).getType() == Material.EMPTY_MAP ? 0 : menuInv.getItem(4).getAmount() * 100)
+                + (menuInv.getItem(5).getType() == Material.EMPTY_MAP ? 0 : menuInv.getItem(5).getAmount() * 10)
+                + (menuInv.getItem(3).getType() == Material.EMPTY_MAP ? 0 : menuInv.getItem(6).getAmount());
     }
 
     public String digitString(int slotID) {
-        if(slotID == 3) return "HUNDREDS";
-        else if(slotID == 4) return "TENS";
+        if(slotID == 2) return "TEN THOUSANDS";
+        else if(slotID == 3) return "THOUSANDS";
+        else if(slotID == 4) return "HUNDREDS";
+        else if(slotID == 5) return "TENS";
         else return "ONES";
     }
 

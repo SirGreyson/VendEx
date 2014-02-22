@@ -45,13 +45,13 @@ public class ShopOffer {
         if(hasBoundCmd()) return Util.metaStack(itemStack.getItemMeta().getDisplayName(), new ArrayList<String>() {{
             if(itemStack.getItemMeta().hasLore()) addAll(itemStack.getItemMeta().getLore());
             add("Click to  buy 1 for " + shopPrice);
-        }}, itemStack.getType());
+        }}, itemStack.getType(), itemStack.getData().getData());
 
         return Util.metaStack(itemStack.getItemMeta().getDisplayName(), new ArrayList<String>() {{
             if(!inShop.isServerShop()) add(shopAmount + " left");
             add("Click to buy 1 for " + shopPrice);
             add("+Shift to buy " + itemStack.getMaxStackSize() + " for " + itemStack.getMaxStackSize() * shopPrice);
-        }}, itemStack.getType());
+        }}, itemStack.getType(), itemStack.getData().getData());
     }
 
     public int getShopPrice() {
