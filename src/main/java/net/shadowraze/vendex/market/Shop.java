@@ -42,6 +42,7 @@ public class Shop {
     public void removeShopOffer(ShopOffer shopOffer) {
         shopInventory.remove(shopInventory.getItem(shopOffers.indexOf(shopOffer)));
         shopOffers.remove(shopOffer);
+        loadShopInventory();
     }
 
     public void updateShopOffer(ShopOffer shopOffer) {
