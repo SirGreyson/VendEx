@@ -5,9 +5,11 @@ import net.shadowraze.vendex.market.MarketManager;
 import net.shadowraze.vendex.market.menus.*;
 import net.shadowraze.vendex.menu.menus.AdminMenu;
 import net.shadowraze.vendex.menu.menus.VendExMenu;
+import net.shadowraze.vendex.trade.TradeHandler;
 import net.shadowraze.vendex.util.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -77,6 +79,10 @@ public class MenuHandler implements Listener {
         String invTitle = ChatColor.stripColor(e.getInventory().getTitle());
         if(invTitle.endsWith("'s Shop")) SHOP_MENU.onMenuClose(e);
         else if(invTitle.startsWith(MARKET_MENU.getTitle())) MARKET_MENU.onMenuClose(e);
+        else if(invTitle.startsWith(ChatColor.stripColor(TradeHandler.TRADE_MENU.getTitle())) && e.getPlayer().getItemOnCursor() != null) {
+            if(e.getPlayer().getItemOnCursor().getType() != Material.AIR) e.getPlayer().getInventory().addItem(e.getPlayer().getItemOnCursor());
+            e.getPlayer().setItemOnCursor(null);
+        }
         if(!menuMap.containsKey(invTitle)) return;
         if(menuMap.get(invTitle).getSize() != e.getInventory().getSize()) return;
         menuMap.get(invTitle).onMenuClose(e);

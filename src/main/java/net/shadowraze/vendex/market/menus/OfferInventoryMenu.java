@@ -34,7 +34,7 @@ public class OfferInventoryMenu extends Menu {
         Inventory offerInv = Bukkit.createInventory(null, getSize(), getTitle());
         ItemStack invStack = new ItemStack(shopOffer.getItemStack());
         invStack.setAmount(shopOffer.getShopAmount());
-        offerInv.addItem(invStack);
+        if(invStack.getAmount() > 0) offerInv.addItem(invStack);
         player.openInventory(offerInv);
     }
 

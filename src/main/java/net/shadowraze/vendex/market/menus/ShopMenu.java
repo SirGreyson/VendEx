@@ -57,6 +57,7 @@ public class ShopMenu extends Menu {
                         buyStack.setAmount(buyAmount);
                         if(Util.canAddItem(cPlayer.getInventory(), buyStack)) {
                             VendEx.economy.withdrawPlayer(cPlayer.getName(), shopOffer.getShopPrice() * buyAmount);
+                            VendEx.economy.depositPlayer(cShop.getShopOwner(), shopOffer.getShopPrice() * buyAmount);
                             shopOffer.setShopAmount(shopOffer.getShopAmount() - buyAmount);
                             cPlayer.getInventory().addItem(buyStack);
                             if(Bukkit.getPlayerExact(cShop.getShopOwner()) != null)

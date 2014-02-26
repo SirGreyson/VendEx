@@ -48,9 +48,9 @@ public class ShopOffer {
         }}, itemStack.getType(), itemStack.getData().getData());
 
         return Util.metaStack(itemStack.getItemMeta().getDisplayName(), new ArrayList<String>() {{
-            if(!inShop.isServerShop()) add(shopAmount + " left");
-            add("Click to buy 1 for " + shopPrice);
-            add("+Shift to buy " + itemStack.getMaxStackSize() + " for " + itemStack.getMaxStackSize() * shopPrice);
+            if(!inShop.isServerShop()) add(shopAmount > 0 ? "&6" + shopAmount + " left" : "&cOUT OF STOCK");
+            add("&aClick to buy &e1 &afor &e" + shopPrice);
+            add("&e+Shift &ato buy &e" + itemStack.getMaxStackSize() + " &afor&e " + itemStack.getMaxStackSize() * shopPrice);
         }}, itemStack.getType(), itemStack.getData().getData());
     }
 
