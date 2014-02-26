@@ -24,6 +24,7 @@ import java.util.Map;
 
 public class TradeMenu extends Menu {
 
+    private VendEx plugin;
     private Inventory defaultMenu;
 
     private static Map<String, List<Integer>> offerSlots = new HashMap<String, List<Integer>>();
@@ -37,9 +38,10 @@ public class TradeMenu extends Menu {
 
     public Map<Trade, Inventory> tradeMap = new HashMap<Trade, Inventory>();
 
-    public TradeMenu(String menuTitle, int menuSize) {
+    public TradeMenu(VendEx plugin, String menuTitle, int menuSize) {
         super(menuTitle, menuSize);
         MenuHandler.getInstance().registerMenu(ChatColor.stripColor(getTitle()), this);
+        this.plugin = plugin;
     }
 
     @Override
@@ -87,13 +89,13 @@ public class TradeMenu extends Menu {
         Player cPlayer = (Player) e.getWhoClicked();
         Trade playerTrade = TradeHandler.getInstance().getPlayerTrade(cPlayer.getName());
         if(playerTrade == null) return;
-        if(e.getRawSlot() > getSize() || getOfferSlots(playerTrade.isRequester(cPlayer.getName())).contains(e.getRawSlot())) {
+        if(e.getRawSlot() >= e.getInventory().getSize() || getOfferSlots(playerTrade.isRequester(cPlayer.getName())).contains(e.getRawSlot())) {
             if(e.getCurrentItem() != null && !TradeHandler.getInstance().getTradeBlackList().contains(e.getCurrentItem().getType()) && e.getClick() != ClickType.SHIFT_LEFT) {
                 e.setCancelled(false);
                 playerTrade.resetAccepted();
             }
         }
-        else if(e.getRawSlot() == getConfirmationSlot(playerTrade.isRequester(cPlayer.getName()) && playerTrade.canAccept(cPlayer.getName()))) playerTrade.setAccepted(cPlayer.getName(), !playerTrade.hasAccepted(cPlayer.getName()));
+        else if(e.getRawSlot() == getConfirmationSlot(playerTrade.isRequester(cPlayer.getName())) && playerTrade.canAccept(cPlayer.getName())) playerTrade.setAccepted(cPlayer.getName(), !playerTrade.hasAccepted(cPlayer.getName()));
         else if(e.getRawSlot() == getSize() - 6) TradeHandler.ADD_MONEY_MENU.openMenu((Player) e.getWhoClicked());
         else if(e.getRawSlot() == getSize() - 5) e.getWhoClicked().closeInventory();
         else if(e.getRawSlot() == getSize() - 4) TradeHandler.ADD_GTOKEN_MENU.openMenu((Player) e.getWhoClicked());
@@ -101,7 +103,7 @@ public class TradeMenu extends Menu {
 
     @Override
     public void onMenuClose(final InventoryCloseEvent e) {
-        Bukkit.getScheduler().runTaskLater(VendEx.getPlugin(), new Runnable() {
+        Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
             @Override
             public void run() {
                 if(e.getPlayer().getOpenInventory() != null && MenuHandler.isMenuInventory(e.getPlayer().getOpenInventory().getTitle())) return;

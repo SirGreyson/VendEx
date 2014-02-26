@@ -14,14 +14,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TradeHandler implements Listener {
 
-    private static TradeHandler instance = new TradeHandler();
+    private static TradeHandler instance;
+    private VendEx plugin;
     private static ConfigurationSection tradeConfig = VendEx.getPlugin().getConfig().getConfigurationSection("tradeConfig");
 
-    public static TradeMenu TRADE_MENU = new TradeMenu(Util.parseColor(tradeConfig.getString("tradeMenu.title")), 54);
+    public static TradeMenu TRADE_MENU;
     public static AddMoneyMenu ADD_MONEY_MENU = new AddMoneyMenu(Util.parseColor(tradeConfig.getString("addMoneyMenu.title")), 9);
     public static AddGTokenMenu ADD_GTOKEN_MENU = new AddGTokenMenu(Util.parseColor(tradeConfig.getString("addGTokenMenu.title")), 9);
 
@@ -36,6 +40,12 @@ public class TradeHandler implements Listener {
     private Map<String, String> inviteMap = new HashMap<String, String>();
     private Map<String, Long> inviteTime = new HashMap<String, Long>();
     private Map<String, Long> antiSpamMap = new HashMap<String, Long>();
+
+    public TradeHandler(VendEx plugin) {
+        this.plugin = plugin;
+        this.instance = this;
+        this.TRADE_MENU = new TradeMenu(plugin, Util.parseColor(tradeConfig.getString("tradeMenu.title")), 54);
+    }
 
     public static TradeHandler getInstance() {
         return instance;

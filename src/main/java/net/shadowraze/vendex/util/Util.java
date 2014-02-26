@@ -67,9 +67,10 @@ public class Util {
 
     public static boolean canAddItem(Inventory inventory, ItemStack addItem) {
         int leftToAdd = addItem.getAmount();
-        for(ItemStack itemStack : inventory.getContents())
-            if(itemStack == null) leftToAdd -= addItem.getMaxStackSize();
-            else if(itemStack.isSimilar(itemStack)) leftToAdd -= addItem.getMaxStackSize() - itemStack.getAmount();
+        for(int i = 0; i < inventory.getSize(); i++) {
+            if(inventory.getItem(i) == null) leftToAdd -= addItem.getMaxStackSize();
+            else if(inventory.getItem(i).isSimilar(addItem)) leftToAdd -= addItem.getMaxStackSize() - inventory.getItem(i).getAmount();
+        }
         return leftToAdd <= 0;
     }
 

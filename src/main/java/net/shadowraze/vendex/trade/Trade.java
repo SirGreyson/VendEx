@@ -60,7 +60,7 @@ public class Trade {
     }
 
     public boolean canAccept(String playerName) {
-        if(Util.canAddItems(getPlayer(playerName).getInventory(), getTradeItems(playerName))) return true;
+        if(Util.canAddItems(getPlayer(playerName).getInventory(), getTradeItems(!isRequester(playerName)))) return true;
         Messaging.sendErrorMessage(getPlayer(playerName), "You do not have enough free inventory space to accept this trade!");
         return false;
     }
@@ -96,12 +96,12 @@ public class Trade {
         VendEx.savePersistenceConfig();
     }
 
-    public List<ItemStack> getTradeItems(String playerName) {
-        return TradeHandler.TRADE_MENU.getTradeItems(this, isRequester(playerName));
+    public List<ItemStack> getTradeItems(boolean isRequester) {
+        return TradeHandler.TRADE_MENU.getTradeItems(this, isRequester);
     }
 
     public void giveTradeItems(Player toGive, String fromWho) {
-        for(ItemStack tradeItem : getTradeItems(fromWho))
+        for(ItemStack tradeItem : getTradeItems(isRequester(fromWho)))
             toGive.getInventory().addItem(tradeItem);
         toGive.updateInventory();
         if(fromWho.equalsIgnoreCase(toGive.getName())) return;
@@ -129,7 +129,7 @@ public class Trade {
         if(whoCancelled != null) {
             Messaging.sendErrorMessage(whoCancelled, "You have cancelled the trade!");
             giveTradeItems(whoCancelled, playerName);
-        } else if(whoCancelled == null) saveTradeItems(playerName, getTradeItems(playerName));
+        } else if(whoCancelled == null) saveTradeItems(playerName, getTradeItems(isRequester(playerName)));
         Messaging.sendErrorMessage(otherPlayer, playerName + " has cancelled the trade!");
         giveTradeItems(otherPlayer, otherPlayer.getName());
         TradeHandler.getInstance().removeTrade(this);

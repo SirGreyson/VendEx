@@ -39,6 +39,7 @@ public class VendEx extends JavaPlugin implements Listener {
         MarketManager.instance.loadShops(this);
         MenuHandler.getInstance().loadMenus(this);
         MarketManager.getVendors();
+        new TradeHandler(this);
         getServer().getPluginManager().registerEvents(MenuHandler.getInstance(), this);
         getServer().getPluginManager().registerEvents(TradeHandler.getInstance(), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);

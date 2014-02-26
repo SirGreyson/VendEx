@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -64,7 +65,7 @@ public class MenuHandler implements Listener {
         menuMap.put(title, newMenu);
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onMenuClick(InventoryClickEvent e) {
         String invTitle = ChatColor.stripColor(e.getInventory().getTitle());
         if(invTitle.endsWith("'s Shop") || e.getInventory().getTitle().equalsIgnoreCase(MarketManager.serverShop.getShopInventory().getTitle())) SHOP_MENU.onMenuClick(e);
@@ -74,7 +75,7 @@ public class MenuHandler implements Listener {
         menuMap.get(invTitle).onMenuClick(e);
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onMenuClose(InventoryCloseEvent e) {
         String invTitle = ChatColor.stripColor(e.getInventory().getTitle());
         if(invTitle.endsWith("'s Shop")) SHOP_MENU.onMenuClose(e);
@@ -88,7 +89,7 @@ public class MenuHandler implements Listener {
         menuMap.get(invTitle).onMenuClose(e);
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onMenuDrag(InventoryDragEvent e) {
         String invTitle = ChatColor.stripColor(e.getInventory().getTitle());
         if(!menuMap.containsKey(invTitle)) return;
