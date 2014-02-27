@@ -2,6 +2,7 @@ package net.shadowraze.vendex.market.menus;
 
 import net.shadowraze.vendex.market.ShopOffer;
 import net.shadowraze.vendex.menu.Menu;
+import net.shadowraze.vendex.util.Messaging;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -33,8 +34,18 @@ public class OfferInventoryMenu extends Menu {
         offerMap.put(player.getName(), shopOffer);
         Inventory offerInv = Bukkit.createInventory(null, getSize(), getTitle());
         ItemStack invStack = new ItemStack(shopOffer.getItemStack());
+        int amntLeft = shopOffer.getShopAmount();
+        for (int i = 0; i < offerInv.getSize() && amntLeft > 0; i++) {
+            invStack.setAmount(amntLeft > shopOffer.getItemStack().getMaxStackSize()? shopOffer.getItemStack().getMaxStackSize() : amntLeft);
+            offerInv.setItem(i, invStack);
+            amntLeft -= invStack.getAmount();
+        } while(amntLeft > 0) {
+            invStack.setAmount(amntLeft > invStack.getMaxStackSize() ? invStack.getMaxStackSize() : amntLeft);
+            player.getWorld().dropItemNaturally(player.getLocation(), invStack);
+            amntLeft -= 1;
+            if(amntLeft == 0) Messaging.sendErrorMessage(player, "You had an impossible stack! This menu has been fixed and remaining items have been dropped!");
+        }
         invStack.setAmount(shopOffer.getShopAmount());
-        if(invStack.getAmount() > 0) offerInv.addItem(invStack);
         player.openInventory(offerInv);
     }
 

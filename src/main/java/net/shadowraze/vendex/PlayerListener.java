@@ -28,6 +28,7 @@ public class PlayerListener implements Listener {
             if(iSec.getItemStack(String.valueOf(i)) == null) break;
             e.getPlayer().getInventory().addItem(iSec.getItemStack(String.valueOf(i)));
         }
+        VendEx.getPersistenceConfig().set("savedTradeItems." + e.getPlayer().getName(), null);
     }
 
     @EventHandler

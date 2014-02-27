@@ -43,15 +43,17 @@ public class ShopOffer {
 
     public ItemStack getMenuStack() {
         if(hasBoundCmd()) return Util.metaStack(itemStack.getItemMeta().getDisplayName(), new ArrayList<String>() {{
+            if(itemStack.getItemMeta().hasLore()) add(" ");
             if(itemStack.getItemMeta().hasLore()) addAll(itemStack.getItemMeta().getLore());
             add("Click to  buy 1 for " + shopPrice);
-        }}, itemStack.getType(), itemStack.getData().getData());
+        }}, itemStack);
 
         return Util.metaStack(itemStack.getItemMeta().getDisplayName(), new ArrayList<String>() {{
+            if(itemStack.getItemMeta().hasLore()) add(" ");
             if(!inShop.isServerShop()) add(shopAmount > 0 ? "&6" + shopAmount + " left" : "&cOUT OF STOCK");
             add("&aClick to buy &e1 &afor &e" + shopPrice);
             add("&e+Shift &ato buy &e" + itemStack.getMaxStackSize() + " &afor&e " + itemStack.getMaxStackSize() * shopPrice);
-        }}, itemStack.getType(), itemStack.getData().getData());
+        }}, itemStack);
     }
 
     public int getShopPrice() {

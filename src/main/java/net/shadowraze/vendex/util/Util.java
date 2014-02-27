@@ -64,6 +64,28 @@ public class Util {
         return tempStack;
     }
 
+    public static ItemStack metaStack(String name, String loreLine, ItemStack fromStack) {
+        ItemStack tempStack = fromStack.clone();
+        ItemMeta tempMeta = tempStack.getItemMeta();
+        if(name != null) tempMeta.setDisplayName(parseColor(name));
+        List<String> parsedLore = new ArrayList<String>();
+        parsedLore.add(parseColor(loreLine));
+        tempMeta.setLore(parsedLore);
+        tempStack.setItemMeta(tempMeta);
+        return tempStack;
+    }
+
+    public static ItemStack metaStack(String name, List<String> lore, ItemStack fromStack) {
+        ItemStack tempStack = fromStack.clone();
+        ItemMeta tempMeta = tempStack.getItemMeta();
+        if(name != null) tempMeta.setDisplayName(parseColor(name));
+        List<String> parsedLore = new ArrayList<String>();
+        for(String loreItem : lore)
+            parsedLore.add(parseColor(loreItem));
+        tempMeta.setLore(parsedLore);
+        tempStack.setItemMeta(tempMeta);
+        return tempStack;
+    }
 
     public static boolean canAddItem(Inventory inventory, ItemStack addItem) {
         int leftToAdd = addItem.getAmount();
